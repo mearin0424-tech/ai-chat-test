@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Dify接続テスト</title>
+</head>
+<body>
+
+    <button onclick="callDify()" style="padding: 20px; font-size: 20px; cursor: pointer;">
+        🤖 AIを呼び出す（テスト実行）
+    </button>
+
+    <p id="result" style="margin-top: 20px; font-weight: bold; font-family: sans-serif; color: #333;">
+        ボタンを押して待機してください...
+    </p>
+
+    <script>
+        // ▼ 無料のキー
+        const API_KEY = 'app-qkVNEJNAnjBm9CVC28JOY8iU'; 
+
+        async function callDify() {
+            const resultP = document.getElementById('result');
+            resultP.innerText = "通信中... (Difyに問い合わせています)";
+
+            // ▼ テスト用に送るメッセージ
+            // ここを書き換えれば、AIへの質問が変わります
+            const message = "面白い雑学を1つ教えて"; 
+
+            try {
+                // Dify CloudのAPIエンドポイント
+                const response = await fetch('https://api.dify.ai/v1/chat-messages', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        inputs: {},
+                        query: message,
+                        response_mode: "blocking",
+                        user: "test-user-001"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`APIエラー: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // 成功したら画面に表示
+                resultP.innerText = "💡AIの回答:\n" + data.answer;
+
+            } catch (error) {
+                console.error(error);
+                resultP.innerText = "エラーが発生しました。\nDify側でアプリが「公開(Publish)」されているか確認してください。";
+            }
+        }
+    </script>
+</body>
+</html>
