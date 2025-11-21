@@ -2,27 +2,32 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AIスカウト ぴよ子ちゃん</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         /* 基本設定 */
         body { 
-            background-color: #fffbeb; /* うすーい黄色 */
+            background-color: #fffbeb; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             color: #4a4a4a;
             overscroll-behavior-y: none;
+            margin: 0; padding: 0;
         }
         
         /* チャットエリア */
         .chat-container { 
             padding-top: 70px; 
-            padding-bottom: 200px; 
+            padding-bottom: 140px; 
             min-height: 100vh;
             box-sizing: border-box;
+            overflow-x: hidden;
         }
         
+        /* 最後の要素が見えるようにするためのスペーサー */
+        .spacer { height: 60px; width: 100%; clear: both; }
+
         /* メッセージバブル */
         .message { max-width: 88%; margin-bottom: 20px; position: relative; clear: both; animation: fadeIn 0.4s ease; }
         .message.ai { float: left; padding-left: 58px; }
@@ -32,7 +37,7 @@
         .message.ai .bubble { background: #fff; color: #333; border-radius: 4px 18px 18px 18px; border: 1px solid #faedcd; }
         .message.user .bubble { background: #fbbf24; color: #fff; border-radius: 18px 4px 18px 18px; font-weight: bold; }
         
-        /* ぴよ子アイコン */
+        /* アイコン */
         .ai-icon { 
             position: absolute; left: 0; top: 0; 
             width: 48px; height: 48px; 
@@ -45,23 +50,18 @@
 
         /* 選択肢エリア */
         .options-container { margin-top: 10px; clear: both; }
-        
-        /* 16タイプ用グリッド */
         .type-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
-        
-        /* 通常選択肢 */
         .options-flex { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         
         /* ボタン */
         .option-btn { 
             background: #fff; border: 1px solid #fbbf24; color: #d97706; 
-            padding: 10px 4px; border-radius: 12px; font-size: 12px; font-weight: bold; 
+            padding: 12px 4px; border-radius: 12px; font-size: 12px; font-weight: bold; 
             cursor: pointer; transition: all 0.2s; text-align: center; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
             width: 100%; display: flex; align-items: center; justify-content: center;
         }
         .option-btn:active { transform: scale(0.96); background: #fff7ed; }
-        
         .btn-wide { width: 100%; padding: 12px; background-color: #fff; border-color: #d1d5db; color: #6b7280; margin-top: 8px; }
 
         /* 入力エリア */
@@ -77,13 +77,13 @@
         .send-btn { width: 48px; height: 48px; background: #fbbf24; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; flex-shrink: 0; shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
         /* 店舗カード */
-        .shop-card { background: white; border-radius: 16px; overflow: hidden; margin-top: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #fef3c7; width: 100%; }
-        .shop-header { position: relative; height: 140px; }
+        .shop-card { background: white; border-radius: 16px; overflow: hidden; margin-top: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #fef3c7; width: 100%; margin-bottom: 16px; }
+        .shop-header { position: relative; height: 130px; }
         .shop-img { width: 100%; height: 100%; object-fit: cover; }
         .shop-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; font-size: 10px; padding: 4px 8px; border-radius: 4px; }
-        .shop-body { padding: 16px; }
-        .match-reason { color: #d97706; font-weight: bold; font-size: 13px; background: #fffbeb; padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; display: inline-block; border: 1px solid #fcd34d; }
-        .tag { font-size: 11px; color: #666; background: #f3f4f6; padding: 4px 8px; border-radius: 6px; margin-right: 4px; display: inline-block; margin-bottom: 4px;}
+        .shop-body { padding: 14px; }
+        .match-reason { color: #d97706; font-weight: bold; font-size: 12px; background: #fffbeb; padding: 4px 8px; border-radius: 6px; margin-bottom: 6px; display: inline-block; border: 1px solid #fcd34d; }
+        .tag { font-size: 10px; color: #666; background: #f3f4f6; padding: 3px 6px; border-radius: 4px; margin-right: 4px; display: inline-block; margin-bottom: 4px;}
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -102,6 +102,9 @@
     <!-- チャットエリア -->
     <div id="chat-box" class="chat-container px-4"></div>
 
+    <!-- スペーサー -->
+    <div id="bottom-spacer" style="height: 100px;"></div>
+
     <!-- 入力エリア -->
     <div class="input-area">
         <input type="text" id="user-input" class="input-field" placeholder="メッセージを入力..." autocomplete="off">
@@ -117,47 +120,31 @@
         
         let step = 1;
         let userData = {}; 
+        let currentMatches = []; // マッチした店舗リストを保存
+        let matchIndex = 0; // 表示済み店舗のインデックス
 
         const type16Codes = [
-            "LATF", "LATP", "LASF", "LASP",
-            "LETF", "LETP", "LESF", "LESP",
-            "IATF", "IATP", "IASF", "IASP",
-            "IETF", "IETP", "IESF", "IESP"
+            "LATF", "LATP", "LASF", "LASP", "LETF", "LETP", "LESF", "LESP",
+            "IATF", "IATP", "IASF", "IASP", "IETF", "IETP", "IESF", "IESP"
         ];
 
+        // データを増やしました (8店舗)
         const mockStores = [
-            {
-                id: 1, name: "Lounge Mint (ミント)", area: "西麻布", type: "会員制ラウンジ",
-                tags: ["#ゆる稼ぎ", "#アットホーム", "#お酒飲めないOK", "#紳士・接待"],
-                desc: "ノルマなしで、ママが守ってくれる環境。聞き上手な子が多いよ🐣",
-                score_traits: ["norma_loose", "vibe_quiet"]
-            },
-            {
-                id: 2, name: "Club GALAXY", area: "新宿", type: "キャバクラ",
-                tags: ["#ガッツリ", "#パリピ・若手", "#即戦力", "#酒豪推奨"],
-                desc: "歌舞伎町の有名店。競争は激しいけどバック率は地域最高だぴよ！",
-                score_traits: ["norma_hard", "vibe_party"]
-            },
-            {
-                id: 3, name: "Bar RED", area: "六本木", type: "ガールズバー",
-                tags: ["#個人商店", "#パリピ・若手", "#育成枠あり"],
-                desc: "未経験歓迎。自分のファンを作りたい子に向いてるぴよ✨",
-                score_traits: ["staff_free", "vibe_party"]
-            },
-            {
-                id: 4, name: "Club Jardin", area: "銀座", type: "高級クラブ",
-                tags: ["#紳士・接待", "#育成枠あり", "#落ち着き"],
-                desc: "所作から学べる一流店。スタッフのサポートが手厚いよ。",
-                score_traits: ["staff_teach", "vibe_quiet"]
-            }
+            { id: 1, name: "Lounge Mint", area: "西麻布", type: "会員制ラウンジ", tags: ["#ゆる稼ぎ", "#アットホーム", "#お酒飲めないOK"], desc: "ノルマなしでママが守ってくれる環境🐣", score_traits: ["norma_loose", "vibe_quiet"] },
+            { id: 2, name: "Club GALAXY", area: "新宿", type: "キャバクラ", tags: ["#ガッツリ", "#パリピ", "#酒豪推奨"], desc: "競争は激しいけどバック率は地域最高だぴよ！", score_traits: ["norma_hard", "vibe_party"] },
+            { id: 3, name: "Bar RED", area: "六本木", type: "ガールズバー", tags: ["#個人商店", "#パリピ", "#育成枠"], desc: "未経験歓迎。自分のファンを作りたい子向き✨", score_traits: ["staff_free", "vibe_party"] },
+            { id: 4, name: "Club Jardin", area: "銀座", type: "高級クラブ", tags: ["#紳士・接待", "#育成枠", "#落ち着き"], desc: "所作から学べる一流店。サポート手厚いよ。", score_traits: ["staff_teach", "vibe_quiet"] },
+            { id: 5, name: "Lounge Velfarre", area: "六本木", type: "ラウンジ", tags: ["#ゆる稼ぎ", "#容姿重視", "#お酒飲めないOK"], desc: "知名度抜群。芸能関係も来るお店だぴよ。", score_traits: ["norma_loose", "vibe_quiet"] },
+            { id: 6, name: "Club Emperor", area: "新宿", type: "キャバクラ", tags: ["#ガッツリ", "#即戦力"], desc: "歌舞伎町の老舗。メンタル強い子は大歓迎🔥", score_traits: ["norma_hard", "vibe_party"] },
+            { id: 7, name: "Snack 琥珀", area: "中野", type: "スナック", tags: ["#アットホーム", "#ゆる稼ぎ"], desc: "ママがとにかく優しい。未経験でも安心。", score_traits: ["norma_loose", "vibe_quiet"] },
+            { id: 8, name: "Salon de Ebis", area: "恵比寿", type: "会員制クラブ", tags: ["#個人商店", "#隠れ家"], desc: "落ち着いたお客様が多い隠れ家サロン。", score_traits: ["staff_free", "vibe_quiet"] }
         ];
 
         // ==========================================
         // 開始
         // ==========================================
         window.onload = () => {
-            addAiMessage("お疲れ様だぴよ！🐣\nAIスカウトの**ぴよ子**だぴよ。\n\nあなたにピッタリのお店を見つけるために、いくつか質問させてね！\n\nまずは**「16タイプ接客診断」**の結果を教えてほしいぴよ！", 
-                [], "type_selection");
+            addAiMessage("お疲れ様だぴよ！🐣\nAIスカウトの**ぴよ子**だぴよ。\n\nあなたにピッタリのお店を見つけるために、いくつか質問させてね！\n\nまずは**「16タイプ接客診断」**の結果を教えてほしいぴよ！", [], "type_selection");
         };
 
         // ==========================================
@@ -168,125 +155,178 @@
             showTypingIndicator();
             setTimeout(() => {
                 removeTypingIndicator();
-                nextQuestion(text);
+                
+                // もっと見る機能のハンドリング
+                if (text.includes("もっと")) {
+                    showNextBatch();
+                } else {
+                    nextQuestion(text);
+                }
             }, 600);
         }
 
         function nextQuestion(text) {
             switch(step) {
-                case 1: // 16タイプの回答
+                case 1: 
                     if (text.includes("まだ") || text.includes("わからない")) {
-                        // 診断への誘導フローへ分岐 (stepを小数点で管理)
                         step = 1.5;
-                        addAiMessage("自分の接客タイプがわかると、より最適なお店を提案できるぴよ！\n今すぐ診断やってみる？🐣", 
-                        ["やってみる (診断サイトへ)", "今はやらない"]);
+                        addAiMessage("自分の接客タイプがわかると、より最適なお店を提案できるぴよ！\n今すぐ診断やってみる？🐣", ["やってみる (診断サイトへ)", "今はやらない"]);
                     } else {
-                        // タイプ選択済み -> 通常フローへ
                         userData.type = text;
-                        step = 2; // 次のステップへ
-                        addAiMessage(`**${text}** タイプだね！把握したぴよ📝\nそのタイプだとハマるお店の傾向がありそうだぴよ…。\n\n次は、**希望のエリア**を教えて！`, 
-                        ["六本木・西麻布", "新宿・歌舞伎町", "銀座・新橋", "恵比寿・中目黒", "こだわらない"]);
+                        step = 2;
+                        addAiMessage(`**${text}** タイプだね！把握したぴよ📝\n次は、**希望のエリア**を教えて！`, ["六本木・西麻布", "新宿・歌舞伎町", "銀座・新橋", "恵比寿・中目黒", "こだわらない"]);
                     }
                     break;
 
-                case 1.5: // 診断誘導への回答
+                case 1.5: 
                     if (text.includes("やってみる")) {
-                        addAiMessage("行ってらっしゃいだぴよ！👋\n診断が終わったら、結果を覚えてまた戻ってきてね！");
-                        setTimeout(() => {
-                            window.location.href = "https://mearin0424-tech.github.io/personality-test/personality-test.html";
-                        }, 1500);
+                        addAiMessage("行ってらっしゃいだぴよ！👋\n診断が終わったら、また戻ってきてね！");
+                        setTimeout(() => window.location.href = "https://mearin0424-tech.github.io/personality-test/personality-test.html", 1500);
                     } else {
-                        // 今はやらない
                         userData.type = "unknown";
                         step = 2;
-                        addAiMessage("OKだぴよ！今回はこのまま進めるね😊\n\nじゃあ、**希望のエリア**はどの辺り？", 
-                        ["六本木・西麻布", "新宿・歌舞伎町", "銀座・新橋", "恵比寿・中目黒", "こだわらない"]);
+                        addAiMessage("OKだぴよ！今回はこのまま進めるね😊\n\nじゃあ、**希望のエリア**はどの辺り？", ["六本木・西麻布", "新宿・歌舞伎町", "銀座・新橋", "恵比寿・中目黒", "こだわらない"]);
                     }
                     break;
 
-                case 2: // エリア
+                case 2: 
                     userData.area = text;
                     step++;
-                    addAiMessage(`エリアは ${text} ね。\n\nここから**お店の裏側（ぶっちゃけ）**について聞くぴよ🐣\nお店の雰囲気、どっちが楽？`, 
-                        ["ワイワイ盛り上がる (パリピ系)", "しっぽり話す (落ち着き系)"]);
+                    addAiMessage(`エリアは ${text} ね。\n\nここから**お店の裏側（ぶっちゃけ）**について聞くぴよ🐣\nお店の雰囲気、どっちが楽？`, ["ワイワイ盛り上がる (パリピ系)", "しっぽり話す (落ち着き系)"]);
                     break;
 
-                case 3: // 雰囲気
+                case 3: 
                     userData.vibe = text.includes("ワイワイ") ? "vibe_party" : "vibe_quiet";
                     step++;
-                    addAiMessage("なるほどね🍸\n\n一番大事な**「ノルマ（数字）」**について。\nぶっちゃけ、どれくらい耐えられる？", 
-                        ["絶対ムリ！気楽にやりたい (#ゆる稼ぎ)", "稼げるなら戦う (#ガッツリ)"]);
+                    addAiMessage("なるほどね🍸\n\n一番大事な**「ノルマ（数字）」**について。\nぶっちゃけ、どれくらい耐えられる？", ["絶対ムリ！気楽にやりたい (#ゆる稼ぎ)", "稼げるなら戦う (#ガッツリ)"]);
                     break;
 
-                case 4: // ノルマ
+                case 4: 
                     userData.norma = text.includes("ムリ") ? "norma_loose" : "norma_hard";
                     step++;
-                    addAiMessage("正直でよろしい🙆‍♀️\n\n最後！**スタッフさんとの距離感**はどう？", 
-                        ["手取り足取り教えてほしい (#育成枠)", "自由にやらせてほしい (#個人商店)"]);
+                    addAiMessage("正直でよろしい🙆‍♀️\n\n最後！**スタッフさんとの距離感**はどう？", ["手取り足取り教えてほしい (#育成枠)", "自由にやらせてほしい (#個人商店)"]);
                     break;
 
-                case 5: // スタッフ
+                case 5: 
                     userData.staff = text.includes("教えて") ? "staff_teach" : "staff_free";
                     step++;
-                    addAiMessage("ありがとう！全部見えたぴよ✨\n\n今回のお店選び、**何を一番優先**して提案してほしい？", 
-                        ["場所 (エリア絶対！)", "働きやすさ (性格重視)", "とにかく稼ぐ"]);
+                    addAiMessage("ありがとう！全部見えたぴよ✨\n\n今回のお店選び、**何を一番優先**して提案してほしい？", ["場所 (エリア絶対！)", "働きやすさ (性格重視)", "とにかく稼ぐ"]);
                     break;
 
-                case 6: // 結果へ
+                case 6: 
                     userData.priority = text;
-                    showResult();
+                    calculateMatches(); // マッチング計算
                     break;
             }
         }
 
         // ==========================================
-        // マッチング結果
+        // マッチングロジック (3店舗抽出)
         // ==========================================
-        function showResult() {
-            addAiMessage("OK！5,000店舗のデータと照らし合わせるから、ちょっと待っててね...🐤💨");
-            
+        function calculateMatches() {
+            addAiMessage("OK！5,000店舗のデータから**TOP3**を選んでるから、ちょっと待っててね...🐤💨");
+
             setTimeout(() => {
-                let resultHTML = "";
-                let message = "";
-                let targetStore = null;
+                // スコアリング（簡易版：条件に合うものを先頭に持ってくるソート）
+                currentMatches = mockStores.sort((a, b) => {
+                    let scoreA = 0;
+                    let scoreB = 0;
 
-                if (userData.priority.includes("働きやすさ")) {
-                    targetStore = mockStores.find(s => s.score_traits.includes(userData.norma) && s.score_traits.includes(userData.vibe));
-                    if (!targetStore) targetStore = mockStores.find(s => s.score_traits.includes(userData.norma));
-                    
-                    const isDiffArea = !userData.area.includes(targetStore.area) && !userData.area.includes("こだわらない");
-                    message = `今回は**「お店との相性」**を最優先したぴよ！\n`;
-                    if (isDiffArea) {
-                        message += `希望は「${userData.area}」だったけど、ぶっちゃけあなたのタイプには**エリアを変えてでもこのお店の方が絶対幸せになれる**と思うぴよ！👇`;
+                    // 優先度による重み付け
+                    if (userData.priority.includes("働きやすさ")) {
+                        // 相性重視：裏タグ(score_traits)の一致を見る
+                        if (a.score_traits.includes(userData.norma)) scoreA += 5;
+                        if (a.score_traits.includes(userData.vibe)) scoreA += 3;
+                        if (b.score_traits.includes(userData.norma)) scoreB += 5;
+                        if (b.score_traits.includes(userData.vibe)) scoreB += 3;
+                    } else if (userData.priority.includes("場所")) {
+                        // 場所重視
+                        if (userData.area.includes(a.area)) scoreA += 10;
+                        if (userData.area.includes(b.area)) scoreB += 10;
                     } else {
-                        message += `あなたの性格なら、このお店がストレスなく働けるはずだぴよ！👇`;
+                        // 稼ぎ重視
+                        if (a.tags.includes("#ガッツリ")) scoreA += 5;
+                        if (b.tags.includes("#ガッツリ")) scoreB += 5;
                     }
-                    const reason = (userData.norma === "norma_loose") ? "ノルマなしで安心" : "ガッツリ稼げる環境";
-                    resultHTML = createShopCard(targetStore, "相性スコア 98%💖", `性格診断マッチ：${reason}`);
+                    return scoreB - scoreA; // 降順ソート
+                });
 
-                } else if (userData.priority.includes("場所")) {
-                    message = `**「エリア」**を最優先で探したぴよ！\n${userData.area}なら、ここが一番条件に近いぴよ。`;
-                    targetStore = mockStores.find(s => userData.area.includes(s.area)) || mockStores[0];
-                    resultHTML = createShopCard(targetStore, "エリア希望一致📍", "このエリアの人気店");
-                } else {
-                    message = `**「稼ぎ」**重視ね！🔥\nそれなら、多少厳しくてもバック率が高いここがオススメだぴよ。`;
-                    targetStore = mockStores.find(s => s.tags.includes("#ガッツリ")) || mockStores[1];
-                    resultHTML = createShopCard(targetStore, "高収入狙い💰", "実力主義・高バック");
-                }
-
-                addAiMessage(message);
-                
-                setTimeout(() => {
-                    const div = document.createElement('div');
-                    div.innerHTML = resultHTML;
-                    div.className = "w-[88%] float-left pl-[58px] mb-4 animation-fade-in";
-                    chatBox.appendChild(div);
-                    scrollToBottom();
-                    setTimeout(() => addAiMessage("どうかな？\n「詳細見たい」で担当者に繋ぐぴよ！🐣"), 1000);
-                }, 500);
+                matchIndex = 0;
+                showNextBatch(); // 最初の3件を表示
 
             }, 1500);
         }
+
+        // ==========================================
+        // 結果表示 (ページネーション対応)
+        // ==========================================
+        function showNextBatch() {
+            // 今回表示する3件を取り出す
+            const batch = currentMatches.slice(matchIndex, matchIndex + 3);
+            
+            if (batch.length === 0) {
+                addAiMessage("ごめんね、条件に合うお店はこれ以上見つからなかったぴよ💦\n条件を変えてもう一度探してみる？", ["リセットして最初から"]);
+                return;
+            }
+
+            let message = "";
+            if (matchIndex === 0) {
+                // 最初の提案
+                if (userData.priority.includes("働きやすさ")) {
+                    const isDiffArea = !userData.area.includes(batch[0].area) && !userData.area.includes("こだわらない");
+                    message = isDiffArea 
+                        ? `希望は「${userData.area}」だったけど、ぶっちゃけあなたのタイプには**エリアを変えてでもこのお店の方が絶対幸せになれる**と思うぴよ！👇`
+                        : `あなたの性格なら、このお店がストレスなく働けるはずだぴよ！👇`;
+                } else if (userData.priority.includes("場所")) {
+                    message = `**「エリア」**を最優先で、条件が良い順に3つ選んだぴよ！📍`;
+                } else {
+                    message = `**「稼ぎ」**重視で、バック率が高い順にピックアップしたぴよ！💰`;
+                }
+            } else {
+                // 2回目以降の提案
+                message = `ほかにはこんなお店もあるよ！👀`;
+            }
+
+            addAiMessage(message);
+
+            setTimeout(() => {
+                // 3つのカードを生成
+                let resultHTML = "";
+                batch.forEach(store => {
+                    // 理由テキスト生成
+                    let reason = "";
+                    if (userData.priority.includes("働きやすさ")) {
+                        reason = store.score_traits.includes("norma_loose") ? "ノルマなしで安心" : "性格に合う環境";
+                    } else if (userData.priority.includes("場所")) {
+                        reason = "エリア希望一致";
+                    } else {
+                        reason = "高収入狙い";
+                    }
+                    resultHTML += createShopCard(store, "おすすめ✨", reason);
+                });
+
+                // カードを表示
+                const div = document.createElement('div');
+                div.innerHTML = resultHTML;
+                div.className = "w-[88%] float-left pl-[58px] mb-4 animation-fade-in";
+                chatBox.appendChild(div);
+                scrollToBottom();
+
+                // 次の候補があるかチェック
+                matchIndex += 3;
+                const hasMore = currentMatches.length > matchIndex;
+
+                setTimeout(() => {
+                    if (hasMore) {
+                        addAiMessage("どうかな？\nもっと他のお店も見てみる？", ["もっと他のお店を見る", "この中から選ぶ"]);
+                    } else {
+                        addAiMessage("おすすめは以上だぴよ！\n気になるお店があったら「詳細見たい」って言ってね🐣");
+                    }
+                }, 1000);
+
+            }, 500);
+        }
+
 
         // ==========================================
         // UIコンポーネント
@@ -307,7 +347,11 @@
             } else if (options.length > 0) {
                 optionsHtml = `
                     <div class="options-container options-flex">
-                        ${options.map(opt => `<button class="option-btn" style="width:auto; padding:8px 16px;" onclick="processAnswer('${opt}')">${opt}</button>`).join('')}
+                        ${options.map(opt => {
+                            // リセットボタンの場合の処理
+                            const clickAction = opt.includes("リセット") ? "location.reload()" : `processAnswer('${opt}')`;
+                            return `<button class="option-btn" style="width:auto; padding:8px 16px;" onclick="${clickAction}">${opt}</button>`;
+                        }).join('')}
                     </div>`;
             }
 
